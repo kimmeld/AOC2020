@@ -20,7 +20,7 @@ GET(ARG.) TEST.KEY THEN
     RESULT = INPUT.DATA
   END
   ELSE
-    PRINT 'No test data found - ':K.INPUT:' - invoking editor...'
+    CRT 'No test data found - ':K.INPUT:' - invoking editor...'
     EXECUTE 'AE AOC.INPUT.FILES ':K.INPUT
     READ INPUT.DATA FROM F.AOC.INPUT,K.INPUT THEN
       RESULT = INPUT.DATA
@@ -37,7 +37,7 @@ ELSE
     RET = createSecureRequest(URL, 'GET', REQ, MYCTX)
     RET = setRequestHeader(REQ, 'Cookie', 'session=':S.SESSION.COOKIE)
     RET = submitRequest(REQ, 10000, '', RESP.HEADERS, RESP.DATA, RESP.STATUS)
-RESP.DATA = TRIM(RESP.DATA, CHAR(10), 'T')
+    RESP.DATA = TRIM(RESP.DATA, CHAR(10), 'T')
 
     WRITE RESP.DATA TO F.AOC.INPUT,K.INPUT
     READ RESP.DATA FROM F.AOC.INPUT,K.INPUT ELSE
