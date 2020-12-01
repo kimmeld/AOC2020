@@ -39,5 +39,5 @@ If you run an Advent of Code program with a commandline parameter (e.g., `RUN BP
 
 * [Rocket UniVerse](https://www.rocketsoftware.com/products/rocket-universe-0/rocket-universe)
 * [Rocket UniVerse Documentation](https://docs.rocketsoftware.com/nxt/gateway.dll?f=templates$fn=default.htm) - go to Rocket U2 > UniVerse > V12.1.1 to access the documentation library.
-  * For someone who just wants to understand this code, but not necessarily install UniVerse and run it, the best places to start are the UniVerse BASIC Commends Reference and UniVerse BASIC User Guide manuals.
+  * For someone who just wants to understand this code, but not necessarily install UniVerse and run it, the best places to start are the UniVerse BASIC Commands Reference and UniVerse BASIC User Guide manuals.
 
