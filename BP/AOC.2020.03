@@ -1,0 +1,53 @@
+CALL S.GET.INPUT(2020,3,INPUT.LINES)
+INPUT.LINES.COUNT = DCOUNT(INPUT.LINES,@FM)
+
+* First, expand the map enough to accommodate how far we are going to go
+* NOTE:  MAX.RMOVE comes from part 2
+MAX.RMOVE = 7
+WIDTH.REQUIRED = INPUT.LINES.COUNT * MAX.RMOVE
+DUPS.REQUIRED = WIDTH.REQUIRED / LEN(INPUT.LINES<1>) + 1
+MAP = ''
+FOR X = 1 TO INPUT.LINES.COUNT
+  FOR Y = 1 TO DUPS.REQUIRED
+    MAP<X> := INPUT.LINES<X>
+  NEXT
+NEXT
+
+* Now calculate part 1
+RMOVE = 3
+DMOVE = 1
+GOSUB COUNT.TREES
+CRT 'Part 1 = ':TREES
+
+* Now, part 2
+P2.RESULT = 1
+MOVES = '1,3,5,7,1|1,1,1,1,2'
+CONVERT ',|' TO @VM:@FM IN MOVES
+* MOVES<1,X> = RMOVE
+* MOVES<2,X> = DMOVE
+
+FOR X = 1 TO 5
+  RMOVE = MOVES<1,X>
+  DMOVE = MOVES<2,X>
+  GOSUB COUNT.TREES
+  P2.RESULT = TREES * P2.RESULT
+NEXT X
+CRT 'Part 2 = ':P2.RESULT
+STOP
+
+COUNT.TREES: 
+* Now move through the map and start counting trees
+TREES = 0
+RPOS = 1
+DPOS = 1
+FOR DPOS = 1 TO INPUT.LINES.COUNT STEP DMOVE
+  C = MAP<DPOS>[RPOS,1]
+  IF C <> '.' AND C <> '#' THEN
+    STOP 'MAP ERROR'
+  END
+  IF C = '#' THEN
+    TREES += 1
+  END
+  RPOS += RMOVE
+NEXT
+RETURN
