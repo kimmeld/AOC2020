@@ -35,6 +35,8 @@ TERM 132,49
 
 If you run an Advent of Code program with a commandline parameter (e.g., `RUN BP AOC.2020.01 TEST1`), `S.GET.INPUT` will treat that as an identifier for test data and look for that in `AOC.INPUT.FILES`.  If the test data doesn't exist, it will execute the editor (`AE`) to create it.  `S.GET.INPUT` will store the test data in `AOC.INPUT.FILES` so that tests can be repeated without re-entering the test data.
 
+Days where I've done something interesting are documented in the doc/ directory.
+
 # Reference Material
 
 * [Rocket UniVerse](https://www.rocketsoftware.com/products/rocket-universe-0/rocket-universe)

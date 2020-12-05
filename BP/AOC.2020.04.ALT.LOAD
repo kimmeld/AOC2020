@@ -1,0 +1,49 @@
+CALL S.GET.INPUT(2020,4,INPUT.LINES)
+INPUT.LINES.COUNT = DCOUNT(INPUT.LINES,@FM)
+
+OPEN 'AOC.2020.04.PASSPORTS' TO F.PASSPORTS ELSE
+  STOP 'Cannot open passports data file'
+END
+
+ * Map of field names to their location in PP.DATA
+PP.FIELD.MAP = "byr,iyr,eyr,hgt,hcl,ecl,pid,cid"
+CONVERT ',' TO @FM IN PP.FIELD.MAP
+
+PP.DATA = ''
+PP.DATA.COUNT = 0
+
+* Clear the data file
+CLEARFILE F.PASSPORTS
+
+* Loop through each INPUT.LINE building up a passport block
+* NOTE:  Going past the end of the input data to trigger the parsing code on the last iteration
+THIS.PP = ''
+FOR X = 1 TO INPUT.LINES.COUNT + 1
+  IF INPUT.LINES<X> = '' THEN
+    PP.DATA.COUNT += 1
+* Blank line or end of data, parse this passport block
+    CONVERT ' :' TO @FM:@VM IN THIS.PP
+    THIS.PP.COUNT = DCOUNT(THIS.PP,@FM)
+    PP.DATA = ''
+    FOR Y = 1 TO THIS.PP.COUNT
+      FLD = THIS.PP<Y,1>
+      VAL = THIS.PP<Y,2>
+
+* Map field code to location in dyn array
+      LOCATE FLD IN PP.FIELD.MAP SETTING LOC THEN
+        PP.DATA<LOC> = VAL
+      END
+      ELSE
+        CRT 'Bad field: ':FLD
+      END
+    NEXT
+
+    WRITE PP.DATA TO F.PASSPORTS,PP.DATA.COUNT ELSE
+      STOP 'Cannot write to passports file'
+    END
+    THIS.PP = ''
+  END
+  ELSE
+    THIS.PP<-1> = INPUT.LINES<X>
+  END
+NEXT
