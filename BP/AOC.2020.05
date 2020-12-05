@@ -1,0 +1,36 @@
+CALL S.GET.INPUT(2020,5,INPUT.LINES)
+INPUT.LINES.COUNT = DCOUNT(INPUT.LINES,@FM)
+
+* Part 1
+SEAT.IDS = ''
+FOR X = 1 TO INPUT.LINES.COUNT
+  SEAT.SPEC = INPUT.LINES<X>
+
+* The secret here is that the algorithm described in Day 5 Part 1 is the same as how you would
+* convert a binary number into decimal.  So instead of working through the algorithm, the appropriate
+* thing to do is to convert the input data into binary and use ICONV to convert it to decimal.
+  CONVERT 'FBLR' TO '0101' IN SEAT.SPEC
+  SEAT.ID = ICONV(SEAT.SPEC,'MB')
+
+  LOCATE SEAT.ID IN SEAT.IDS BY 'AR' SETTING LOC THEN
+    STOP 'Duplicate seat ID - SEAT.SPEC=':SEAT.SPEC
+  END
+  ELSE
+    INS SEAT.ID BEFORE SEAT.IDS<LOC>
+  END
+NEXT
+
+MAX.SEAT.ID = MAXIMUM(SEAT.IDS)
+CRT 'Part 1 = ':MAX.SEAT.ID
+
+* Part 2
+FOR X = 1 TO MAX.SEAT.ID
+  LOCATE X IN SEAT.IDS BY 'AR' SETTING LOC ELSE
+* This is a potential seat, check to see if +1 and -1 exist in the data set
+    LOCATE X+1 IN SEAT.IDS BY 'AR' SETTING LOC THEN
+      LOCATE X-1 IN SEAT.IDS BY 'AR' SETTING LOC THEN
+        CRT 'Part 2 = ':X
+      END
+    END
+  END
+NEXT
