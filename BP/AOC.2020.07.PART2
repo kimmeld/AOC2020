@@ -1,0 +1,10 @@
+COMMON /AOC.2020.07/ F.BAGS
+
+OPEN 'AOC.2020.07.BAGS' TO F.BAGS ELSE
+  STOP 'Cannot open AOC.2020.07.BAGS'
+END
+
+TOTAL.COUNT = 0
+CALL AOC.2020.07.PART2.SUM.BAGS('shiny gold', TOTAL.COUNT)
+TOTAL.COUNT -= 1 ;* We only care about the bags inside the shiny gold one
+CRT 'Part 2 = ':TOTAL.COUNT
