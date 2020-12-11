@@ -1,0 +1,62 @@
+CALL S.GET.INPUT(2020,10,INPUT.LINES)
+INPUT.LINES.COUNT = DCOUNT(INPUT.LINES,@FM)
+
+SORTED.INPUT = ''
+FOR X = 1 TO INPUT.LINES.COUNT
+  LOCATE INPUT.LINES<X> IN SORTED.INPUT BY 'AR' SETTING LOC ELSE
+    INS INPUT.LINES<X> BEFORE SORTED.INPUT<LOC>
+  END
+NEXT
+SORTED.INPUT<-1> = SORTED.INPUT<INPUT.LINES.COUNT> + 3
+INPUT.LINES.COUNT += 1
+
+* Part 1
+* I'm counting 2-jumps here just to see if they exist - spoiler alert, they don't
+JUMP.1 = 0
+JUMP.2 = 0
+JUMP.3 = 0
+LAST = 0
+FOR X = 1 TO INPUT.LINES.COUNT
+  CUR = SORTED.INPUT<X>
+  IF CUR - LAST = 3 THEN
+    JUMP.3 += 1
+  END
+  IF CUR - LAST = 2 THEN
+    JUMP.2 += 1
+  END
+  IF CUR - LAST = 1 THEN
+    JUMP.1 += 1
+  END
+  LAST = CUR
+NEXT
+* CRT '1s = ':JUMP.1:' 2s = ':JUMP.2:' 3s = ':JUMP.3
+CRT 'Part 1 = ':JUMP.1 * JUMP.3
+
+* Part 2
+* Using Tribonacci numbers as described in some of the Reddit solutions
+* See https://www.reddit.com/r/adventofcode/comments/ka8z8x/2020_day_10_solutions/
+* I wouldn't have figured out Tribonacci myself, I'd never even heard of it until today!
+TRIB = ''
+TRIB<-1> = 1
+TRIB<-1> = 2
+TRIB<-1> = 4
+TRIB<-1> = 7
+TRIB<-1> = 13
+LAST = 0
+LENGTH = 0
+COMBOS = 1
+FOR X = 1 TO INPUT.LINES.COUNT
+  CUR = SORTED.INPUT<X>
+  IF CUR - LAST = 3 THEN
+    IF LENGTH > 0 THEN
+      COMBOS = COMBOS * TRIB<LENGTH>
+    END
+    LENGTH = 0
+  END
+  ELSE 
+    LENGTH += 1
+  END
+  LAST = CUR
+NEXT
+
+CRT 'Part 2 = ':COMBOS
