@@ -1,0 +1,162 @@
+CALL S.GET.INPUT(2020,11,INPUT.LINES)
+XMAX = DCOUNT(INPUT.LINES,@FM)
+YMAX = LEN(INPUT.LINES<1>)
+
+* Using dimensioned arrays instead of dynamic arrays since access is less messy
+DIM CUR.SEATS(XMAX, YMAX)
+DIM NEW.SEATS(XMAX, YMAX)
+
+FOR X = 1 TO XMAX
+  FOR Y = 1 TO YMAX
+    CUR.SEATS(X,Y) = INPUT.LINES<X>[Y,1]
+  NEXT
+NEXT
+
+* Part 1
+LOOP
+  SEATS.CHANGED = @FALSE
+  FOR X = 1 TO XMAX
+    FOR Y = 1 TO YMAX
+* Get current seat
+      CUR.SEAT = CUR.SEATS(X,Y)
+
+* Count neighbours
+      NEIGHBOURS = 0
+      FOR XX = X-1 TO X+1
+        FOR YY = Y-1 TO Y+1
+          IF NOT(XX = X AND YY = Y) THEN
+            IF XX > 0 AND XX <= XMAX AND YY > 0 AND YY <= YMAX THEN
+              IF CUR.SEATS(XX,YY) = '#' THEN
+                NEIGHBOURS += 1
+              END
+            END
+          END
+        NEXT
+      NEXT
+
+* Evaluate seat changes
+      BEGIN CASE
+        CASE CUR.SEAT = 'L'
+          IF NEIGHBOURS = 0 THEN
+            CUR.SEAT = '#'
+            SEATS.CHANGED = @TRUE
+          END
+        CASE CUR.SEAT = '#'
+          IF NEIGHBOURS >= 4 THEN
+            CUR.SEAT = 'L'
+            SEATS.CHANGED = @TRUE
+          END
+      END CASE
+
+      NEW.SEATS(X,Y) = CUR.SEAT
+    NEXT
+  NEXT
+
+UNTIL NOT(SEATS.CHANGED)
+* Copy new to current
+  FOR X = 1 TO XMAX
+    FOR Y = 1 TO YMAX
+      CUR.SEATS(X,Y) = NEW.SEATS(X,Y)
+    NEXT
+  NEXT
+REPEAT
+
+NUM.SEATS = 0
+FOR X = 1 TO XMAX
+  FOR Y = 1 TO YMAX
+    IF CUR.SEATS(X,Y) = '#' THEN
+      NUM.SEATS += 1
+    END
+  NEXT
+NEXT
+CRT 'Part 1 = ':NUM.SEATS
+
+
+* Part 2
+FOR X = 1 TO XMAX
+  FOR Y = 1 TO YMAX
+    CUR.SEATS(X,Y) = INPUT.LINES<X>[Y,1]
+  NEXT
+NEXT
+
+LOOP
+  SEATS.CHANGED = @FALSE
+  FOR X = 1 TO XMAX
+    FOR Y = 1 TO YMAX
+* Get current seat
+      CUR.SEAT = CUR.SEATS(X,Y)
+
+* Count neighbours
+      NEIGHBOURS = 0
+      FOR FN.DX = -1 TO 1
+        FOR FN.DY = -1 TO 1
+          IF NOT(FN.DX = 0 AND FN.DY = 0) THEN
+            GOSUB FIND.NEIGHBOUR.IN.DIR
+            IF FN.FOUND THEN
+              NEIGHBOURS += 1
+            END
+          END
+        NEXT
+      NEXT
+
+*      CRT 'X=':X:' Y=':Y:' N=':NEIGHBOURS
+
+* Evaluate seat changes
+      BEGIN CASE
+        CASE CUR.SEAT = 'L'
+          IF NEIGHBOURS = 0 THEN
+            CUR.SEAT = '#'
+            SEATS.CHANGED = @TRUE
+          END
+        CASE CUR.SEAT = '#'
+          IF NEIGHBOURS >= 5 THEN
+            CUR.SEAT = 'L'
+            SEATS.CHANGED = @TRUE
+          END
+      END CASE
+
+      NEW.SEATS(X,Y) = CUR.SEAT
+    NEXT
+  NEXT
+
+UNTIL NOT(SEATS.CHANGED)
+* Copy new to current
+  FOR X = 1 TO XMAX
+    FOR Y = 1 TO YMAX
+      CUR.SEATS(X,Y) = NEW.SEATS(X,Y)
+    NEXT
+  NEXT
+REPEAT
+
+NUM.SEATS = 0
+FOR X = 1 TO XMAX
+  FOR Y = 1 TO YMAX
+    IF CUR.SEATS(X,Y) = '#' THEN
+      NUM.SEATS += 1
+    END
+  NEXT
+NEXT
+CRT 'Part 2 = ':NUM.SEATS
+
+STOP
+
+
+FIND.NEIGHBOUR.IN.DIR: 
+* Subroutine to count the number of neighbours seen in the direction defined by FN.DX/FN.DY
+FN.X = X
+FN.Y = Y
+FN.DONE = @FALSE
+FN.FOUND = @FALSE
+LOOP
+  FN.X += FN.DX
+  FN.Y += FN.DY
+UNTIL FN.X < 1 OR FN.Y < 1 OR FN.X > XMAX OR FN.Y > YMAX OR FN.DONE
+  IF CUR.SEATS(FN.X,FN.Y) = '#' THEN
+    FN.FOUND = @TRUE
+    FN.DONE = @TRUE
+  END
+  IF CUR.SEATS(FN.X,FN.Y) = 'L' THEN
+    FN.DONE = @TRUE
+  END
+REPEAT
+RETURN
