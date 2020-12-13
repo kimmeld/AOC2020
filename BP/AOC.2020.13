@@ -1,0 +1,56 @@
+CALL S.GET.INPUT(2020,13,INPUT.LINES)
+TARGET.TS = INPUT.LINES<1>
+BUS.DATA = INPUT.LINES<2>
+CONVERT ',' TO @VM IN BUS.DATA
+
+* BUS.DATA<1,X> = Bus ID, BUS.DATA<2,X> = First TS after target
+
+* Part 1
+FASTEST.WAIT = TARGET.TS
+FASTEST.BUS = 'X'
+N.BUSES = DCOUNT(BUS.DATA<1>,@VM)
+FOR X = 1 TO N.BUSES
+  BUS.ID = BUS.DATA<1,X>
+  IF BUS.ID <> 'x' THEN
+    TRIPS = TRUNC(TARGET.TS / BUS.ID,0)
+    BUS.TS = BUS.ID * TRIPS
+    IF BUS.TS < TARGET.TS THEN
+      TRIPS += 1
+      BUS.TS += BUS.ID
+    END
+    BUS.DATA<2,X> = BUS.TS
+
+    WAITTIME = BUS.TS - TARGET.TS
+    IF WAITTIME < FASTEST.WAIT THEN
+      FASTEST.WAIT = WAITTIME
+      FASTEST.BUS = BUS.ID
+    END
+  END
+NEXT
+
+CRT 'Part 1 = ':FASTEST.WAIT * FASTEST.BUS
+
+* Part 2
+P2.DATA = ''
+FOR X = 1 TO N.BUSES
+  IF BUS.DATA<1,X> <> 'x' THEN
+    P2.DATA<1,-1> = X - 1
+    P2.DATA<2,-1> = BUS.DATA<1,X>
+  END
+NEXT
+N.BUSES = DCOUNT(P2.DATA<1>,@VM)
+
+* This is a reimplementation of https://github.com/cs-cordero/advent_of_code/blob/master/rs/2020/day13/src/main.rs
+* in UniVerse BASIC.
+RESULT = 1
+MODE = 1
+FOR X = 1 TO N.BUSES
+  OFFSET = P2.DATA<1,X>
+  BUS.ID = P2.DATA<2,X>
+  LOOP
+  WHILE MOD(RESULT + OFFSET, BUS.ID) <> 0
+    RESULT += MODE
+  REPEAT
+  MODE = MODE * BUS.ID
+NEXT
+CRT 'Part 2 = ':RESULT
