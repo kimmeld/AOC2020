@@ -1,0 +1,146 @@
+CALL S.GET.INPUT(2020,16,INPUT.LINES)
+INPUT.LINES.COUNT = DCOUNT(INPUT.LINES,@FM)
+
+* Load data
+TICKET.RULES = '' ;* <1,X> =  Field Name, <2,X> = Range Start, <3,X> = Range End - Field Name may be repeated for multiple ranges
+MY.TICKET = ''
+OTHER.TICKETS = ''
+
+CURRENTLY.LOADING = 'RULES'
+FOR X = 1 TO INPUT.LINES.COUNT
+  CUR.LINE = INPUT.LINES<X>
+  BEGIN CASE
+    CASE TRIM(CUR.LINE) = ''
+      BEGIN CASE
+        CASE CURRENTLY.LOADING = 'RULES'
+          CURRENTLY.LOADING = 'MY'
+          X += 1;* Skip over header row
+        CASE CURRENTLY.LOADING = 'MY'
+          CURRENTLY.LOADING = 'OTHER'
+          X += 1;* Skip over header row
+      END CASE
+    CASE CURRENTLY.LOADING = 'RULES'
+      FIELD.NAME = FIELD(CUR.LINE,":",1)
+      RULES = TRIM(FIELD(CUR.LINE,":",2))
+      RULES = CHANGE(RULES, ' or ',@FM)
+      CONVERT '-' TO @VM IN RULES
+      FOR Y = 1 TO 2
+        TICKET.RULES<1,-1> = FIELD.NAME
+        TICKET.RULES<2,-1> = RULES<Y,1>
+        TICKET.RULES<3,-1> = RULES<Y,2>
+      NEXT
+    CASE CURRENTLY.LOADING = 'MY'
+      MY.TICKET = CUR.LINE
+      CONVERT ',' TO @FM IN MY.TICKET
+      TICKET.FIELDS = DCOUNT(MY.TICKET,@FM)
+    CASE CURRENTLY.LOADING = 'OTHER'
+      THIS.TICKET = CUR.LINE
+      CONVERT ',' TO @FM IN THIS.TICKET
+      FOR Y = 1 TO TICKET.FIELDS
+        OTHER.TICKETS<Y,-1> = THIS.TICKET<Y>
+      NEXT
+  END CASE
+NEXT
+TICKET.RULES.COUNT = DCOUNT(TICKET.RULES<1>,@VM)
+OTHER.TICKETS.COUNT = DCOUNT(OTHER.TICKETS<1>,@VM)
+
+* Part 1
+VALID.TICKETS = ''
+ERROR.RATE = 0
+FOR X = 1 TO OTHER.TICKETS.COUNT
+  TICKET.VALID = @TRUE
+  FOR Y = 1 TO TICKET.FIELDS
+    THIS.FLD.VALUE = OTHER.TICKETS<Y,X>
+    THIS.FLD.VALID = @FALSE
+    FOR Z = 1 TO TICKET.RULES.COUNT
+      IF THIS.FLD.VALUE >= TICKET.RULES<2,Z> AND THIS.FLD.VALUE <= TICKET.RULES<3,Z> THEN
+        THIS.FLD.VALID = @TRUE
+      END
+    NEXT
+    IF NOT(THIS.FLD.VALID) THEN
+      ERROR.RATE += THIS.FLD.VALUE
+      TICKET.VALID = @FALSE
+    END
+  NEXT
+
+* Store valid tickets for part 2
+  IF TICKET.VALID THEN
+    FOR Y = 1 TO TICKET.FIELDS
+      VALID.TICKETS<Y,-1> = OTHER.TICKETS<Y,X>
+    NEXT
+  END
+NEXT
+CRT 'Part 1 = ':ERROR.RATE
+
+* Part 2
+VALID.TICKETS.COUNT = DCOUNT(VALID.TICKETS<1>,@VM)
+
+* Build the list of potential field names for each field position
+* The idea here is that we will validate each one and delete that field name
+* from the list if it doesn't match.  At the end we should have a single
+* field name for each position
+TICKET.FIELD.MAP = '' ;* X=field position, <x,y> = potential field names
+FOR X = 1 TO TICKET.RULES.COUNT
+  FOR Y = 1 TO TICKET.FIELDS
+    LOCATE TICKET.RULES<1,X> IN TICKET.FIELD.MAP<Y> BY 'AL' SETTING LOC ELSE
+      INS TICKET.RULES<1,X> BEFORE TICKET.FIELD.MAP<Y,LOC>
+    END
+  NEXT
+NEXT
+
+FOR X = 1 TO VALID.TICKETS.COUNT
+  FOR Y = 1 TO TICKET.FIELDS
+    THIS.FLD.VALUE = VALID.TICKETS<Y,X>
+    POTENTIAL.FIELDS.COUNT = DCOUNT(TICKET.FIELD.MAP<Y>,@VM)
+    FOR Z = POTENTIAL.FIELDS.COUNT TO 1 STEP -1
+      THIS.VALID = @FALSE
+      FOR XX = 1 TO TICKET.RULES.COUNT
+        IF TICKET.RULES<1,XX> = TICKET.FIELD.MAP<Y,Z> THEN
+          IF THIS.FLD.VALUE >= TICKET.RULES<2,XX> AND THIS.FLD.VALUE <= TICKET.RULES<3,XX> THEN
+            THIS.VALID = @TRUE
+          END
+        END
+      NEXT XX
+      IF NOT(THIS.VALID) THEN
+        DEL TICKET.FIELD.MAP<Y,Z>
+      END
+    NEXT Z
+  NEXT
+NEXT
+
+* At this point we have a list of which fields each position could be.
+* Now we have to go through and figure out the only field that is valid for
+* each position.  To do this, we find any positions which only have one possible
+* field, remove that from all of the other field positions, and repeat until all of the
+* field positions have only one possible field.
+
+LOOP
+  SINGLES = ''
+  FOR X = 1 TO TICKET.FIELDS
+    IF DCOUNT(TICKET.FIELD.MAP<X>,@VM) = 1 THEN
+      SINGLES<-1> = TICKET.FIELD.MAP<X,1>
+    END
+  NEXT
+  SINGLES.COUNT = DCOUNT(SINGLES,@FM)
+UNTIL SINGLES.COUNT = TICKET.FIELDS
+  FOR X = 1 TO SINGLES.COUNT
+    FOR Y = 1 TO TICKET.FIELDS
+      IF DCOUNT(TICKET.FIELD.MAP<Y>,@VM) > 1 THEN
+        LOCATE SINGLES<X> IN TICKET.FIELD.MAP<Y> SETTING LOC THEN
+          DEL TICKET.FIELD.MAP<Y,LOC>
+        END
+      END
+    NEXT
+  NEXT
+
+REPEAT
+
+PART.2 = 1
+FOR X = 1 TO TICKET.FIELDS
+*  CRT 'Field ':X:' = ':TICKET.FIELD.MAP<X>
+  IF TICKET.FIELD.MAP<X> MATCHES 'departure...' THEN
+    PART.2 = PART.2 * MY.TICKET<X>
+  END
+NEXT
+
+CRT 'Part 2 = ':PART.2
