@@ -1,0 +1,150 @@
+CALL S.GET.INPUT(2020,17,INPUT.LINES)
+INPUT.LINES.COUNT = DCOUNT(INPUT.LINES,@FM)
+
+OPEN 'AOC.2020.17.CUBES' TO F.CUBES ELSE
+  STOP 'Cannot open AOC.2020.17.CUBES'
+END
+
+* Some reasonable extents for the 'infinite' space in the problem
+MIN.X = -8
+MAX.X = INPUT.LINES.COUNT + 8
+MIN.Y = -8
+MAX.Y = INPUT.LINES.COUNT + 8
+MIN.Z = -8
+MAX.Z = 8
+
+* Part 1
+* Load
+CLEARFILE F.CUBES
+TURN = 0
+FOR X = 1 TO INPUT.LINES.COUNT
+  N.CHARS = LEN(INPUT.LINES<X>)
+  FOR Y = 1 TO N.CHARS
+    K.CUBE = TURN:'*':X:'*':Y:'*':0
+    WRITE INPUT.LINES<X>[Y,1] TO F.CUBES, K.CUBE
+  NEXT
+NEXT
+
+FOR TURN = 1 TO 6
+  FOR X = MIN.X TO MAX.X
+    FOR Y = MIN.Y TO MAX.Y
+      FOR Z = MIN.Z TO MAX.Z
+        K.CUBE = TURN-1:'*':X:'*':Y:'*':Z
+        READ CUR.CUBE FROM F.CUBES,K.CUBE ELSE
+          CUR.CUBE = '.'
+        END
+
+* count neighbours
+        NEIGHBOURS = 0
+        FOR XX = -1 TO 1
+          FOR YY = -1 TO 1
+            FOR ZZ = -1 TO 1
+              IF NOT(XX = 0 AND YY = 0 AND ZZ = 0) THEN
+                K.NCUBE = TURN - 1:'*':X+XX:'*':Y+YY:'*':Z+ZZ
+                READ R.NCUBE FROM F.CUBES,K.NCUBE ELSE
+                  R.NCUBE = '.'
+                END
+                IF R.NCUBE = '#' THEN
+                  NEIGHBOURS += 1
+                END
+              END
+            NEXT ZZ
+          NEXT YY
+        NEXT XX
+
+* Determine state for current cube
+        BEGIN CASE
+          CASE CUR.CUBE = '#'
+            IF NEIGHBOURS <> 2 AND NEIGHBOURS <> 3 THEN
+              CUR.CUBE = '.'
+            END
+          CASE CUR.CUBE = '.'
+            IF NEIGHBOURS = 3 THEN
+              CUR.CUBE = '#'
+            END
+        END CASE
+
+        K.CUBE = TURN:'*':X:'*':Y:'*':Z
+        WRITE CUR.CUBE TO F.CUBES,K.CUBE
+      NEXT Z
+    NEXT Y
+  NEXT X
+NEXT TURN
+
+ACTIVE.COUNT = 0
+EXECUTE 'SELECT AOC.2020.17.CUBES WITH TURN = 6 AND CUBE.STAT = "#"'
+ACTIVE.COUNT = @SELECTED
+CRT 'Part 1 = ':ACTIVE.COUNT
+CLEARSELECT
+
+
+* Part 2
+* This is exactly the same as part 1, just with a 'W' dimension added
+MIN.W = -8
+MAX.W = 8
+* Load
+CLEARFILE F.CUBES
+TURN = 0
+FOR X = 1 TO INPUT.LINES.COUNT
+  N.CHARS = LEN(INPUT.LINES<X>)
+  FOR Y = 1 TO N.CHARS
+    K.CUBE = TURN:'*':X:'*':Y:'*':0:'*':0
+    WRITE INPUT.LINES<X>[Y,1] TO F.CUBES, K.CUBE
+  NEXT
+NEXT
+
+FOR TURN = 1 TO 6
+  FOR X = MIN.X TO MAX.X
+    FOR Y = MIN.Y TO MAX.Y
+      FOR Z = MIN.Z TO MAX.Z
+        FOR W = MIN.W TO MAX.W
+          K.CUBE = TURN-1:'*':X:'*':Y:'*':Z:'*':W
+          READ CUR.CUBE FROM F.CUBES,K.CUBE ELSE
+            CUR.CUBE = '.'
+          END
+
+* count neighbours
+          NEIGHBOURS = 0
+          FOR XX = -1 TO 1
+            FOR YY = -1 TO 1
+              FOR ZZ = -1 TO 1
+                FOR WW = -1 TO 1
+                  IF NOT(XX = 0 AND YY = 0 AND ZZ = 0 AND WW = 0) THEN
+                    K.NCUBE = TURN - 1:'*':X+XX:'*':Y+YY:'*':Z+ZZ:'*':W+WW
+                    READ R.NCUBE FROM F.CUBES,K.NCUBE ELSE
+                      R.NCUBE = '.'
+                    END
+                    IF R.NCUBE = '#' THEN
+                      NEIGHBOURS += 1
+                    END
+                  END
+                NEXT WW
+              NEXT ZZ
+            NEXT YY
+          NEXT XX
+
+* Determine state for current cube
+          BEGIN CASE
+            CASE CUR.CUBE = '#'
+              IF NEIGHBOURS <> 2 AND NEIGHBOURS <> 3 THEN
+                CUR.CUBE = '.'
+              END
+            CASE CUR.CUBE = '.'
+              IF NEIGHBOURS = 3 THEN
+                CUR.CUBE = '#'
+              END
+          END CASE
+
+          K.CUBE = TURN:'*':X:'*':Y:'*':Z:'*':W
+          WRITE CUR.CUBE TO F.CUBES,K.CUBE
+        NEXT W
+      NEXT Z
+    NEXT Y
+  NEXT X
+NEXT TURN
+
+ACTIVE.COUNT = 0
+EXECUTE 'SELECT AOC.2020.17.CUBES WITH TURN = 6 AND CUBE.STAT = "#"'
+ACTIVE.COUNT = @SELECTED
+
+CRT 'Part 2 = ':ACTIVE.COUNT
