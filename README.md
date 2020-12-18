@@ -1,5 +1,5 @@
 # AOC2020
-Advent of Code 2020
+[Advent of Code 2020](https://adventofcode.com/2020/)
 
 This is my Advent of Code 2020 repository.  These programs are written in UniVerse Basic.
 
@@ -33,9 +33,11 @@ TERM 132,49
 # Code Notes
 `S.GET.INPUT` is responsible for retrieving input from the Advent of Code site, caching it, and returning it to the calling program.  You need to create a record called `SESSION.COOKIE` in `AOC.CONFIG` which contains the session cookie from the Advent of Code web site.
 
-If you run an Advent of Code program with a commandline parameter (e.g., `RUN BP AOC.2020.01 TEST1`), `S.GET.INPUT` will treat that as an identifier for test data and look for that in `AOC.INPUT.FILES`.  If the test data doesn't exist, it will execute the editor (`AE`) to create it.  `S.GET.INPUT` will store the test data in `AOC.INPUT.FILES` so that tests can be repeated without re-entering the test data.
+If you run an Advent of Code program with a commandline parameter (e.g., `RUN BP AOC.2020.01 TEST1` or `RAID BP AOC.2020.01`), `S.GET.INPUT` will treat that as an identifier for test data and look for that in `AOC.INPUT.FILES`.  If the test data doesn't exist, it will execute the editor (`AE`) to create it.  `S.GET.INPUT` will store the test data in `AOC.INPUT.FILES` so that tests can be repeated without re-entering the test data.
 
 Days where I've done something interesting are documented in the docs/ directory.
+
+Where possible, I keep the programs self-contained, however there are times where using UniVerse files as a data store is either required to solve the problem or greatly simplifies it.  In some cases, I use the query processor to simplify things.  In these cases, I document the file(s) created and the required entries in the data dictionary.
 
 # Reference Material
 
