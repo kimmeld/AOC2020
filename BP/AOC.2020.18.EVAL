@@ -1,0 +1,45 @@
+SUBROUTINE AOC.2020.18.EVAL(RESULT, EVAL.TEXT)
+OPERATOR = ''
+OPERAND = 0
+
+N.CHARS = LEN(EVAL.TEXT)
+FOR X = 1 TO N.CHARS
+  THIS.CHAR = EVAL.TEXT[X,1]
+
+  BEGIN CASE
+    CASE THIS.CHAR = '('
+      DEPTH = 1
+      POS = 0
+      LOOP
+        POS += 1
+      UNTIL DEPTH = 0
+        IF EVAL.TEXT[X+POS,1] = '(' THEN
+          DEPTH += 1
+        END
+        IF EVAL.TEXT[X+POS,1] = ')' THEN
+          DEPTH -= 1
+        END
+      REPEAT
+      THIS.VAL = 0
+      CALL AOC.2020.18.EVAL(THIS.VAL, EVAL.TEXT[X+1,POS-1])
+      X += POS
+      THIS.CHAR = THIS.VAL
+    CASE THIS.CHAR = '+'
+      OPERATOR = '+'
+    CASE THIS.CHAR = '*'
+      OPERATOR = '*'
+  END CASE
+  IF NUM(THIS.CHAR) THEN
+    BEGIN CASE
+      CASE OPERATOR = '+'
+        OPERAND = OPERAND + THIS.CHAR
+      CASE OPERATOR = '*'
+        OPERAND = OPERAND * THIS.CHAR
+      CASE @TRUE
+        OPERAND = THIS.CHAR
+    END CASE
+  END
+NEXT X
+
+RESULT = OPERAND
+RETURN
